@@ -434,9 +434,7 @@ namespace dnSpy.BamlDecompiler {
 		}
 
 		void DisassembleRecord(BamlContext ctx, TextWithIdRecord record) {
-			DisassembleRecord(ctx, (TextRecord)record);
-
-			WriteText(", ValueId=");
+			WriteText("ValueId=");
 			WriteStringId(ctx, record.ValueId);
 		}
 
