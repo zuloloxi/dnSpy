@@ -47,6 +47,13 @@ namespace ICSharpCode.TreeView
 			SetResourceReference(ItemContainerStyleProperty, DefaultItemContainerStyleKey);
 		}
 
+		public static readonly DependencyProperty CanDragAndDropProperty =
+			DependencyProperty.Register("CanDragAndDrop", typeof(bool), typeof(SharpTreeView), new PropertyMetadata(true));
+		public bool CanDragAndDrop {
+			get { return (bool)GetValue(CanDragAndDropProperty); }
+			set { SetValue(CanDragAndDropProperty, value); }
+		}
+
 		public static readonly DependencyProperty RootProperty =
 			DependencyProperty.Register("Root", typeof(SharpTreeNode), typeof(SharpTreeView));
 
@@ -224,7 +231,7 @@ namespace ICSharpCode.TreeView
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
 			SharpTreeViewItem container = e.OriginalSource as SharpTreeViewItem;
-			switch (e.Key) {
+			if (container != null && container.Node != null) switch (e.Key) {
 				case Key.Left:
 					if (container != null && ItemsControl.ItemsControlFromItemContainer(container) == this) {
 						if (container.Node.IsExpanded) {
@@ -434,7 +441,7 @@ namespace ICSharpCode.TreeView
 			TryAddDropTarget(result, item, DropPlace.Inside, e);
 
 			if (AllowDropOrder) {
-				if (node.IsExpanded && node.Children.Count > 0) {
+				if (node != null && node.IsExpanded && node.Children.Count > 0) {
 					var firstChildItem = ItemContainerGenerator.ContainerFromItem(node.Children[0]) as SharpTreeViewItem;
 					TryAddDropTarget(result, firstChildItem, DropPlace.Before, e);
 				}
@@ -497,7 +504,9 @@ namespace ICSharpCode.TreeView
 			node = null;
 			index = 0;
 
-			if (place == DropPlace.Inside) {
+			if (item.Node == null) {
+			}
+			else if (place == DropPlace.Inside) {
 				node = item.Node;
 				index = node.Children.Count;
 			}
@@ -548,7 +557,7 @@ namespace ICSharpCode.TreeView
 				insertMarker.Visibility = Visibility.Visible;
 
 				var p1 = previewNodeView.TransformToVisual(this).Transform(new Point());
-				var p = new Point(p1.X + previewNodeView.CalculateIndent() + 4.5, p1.Y - 3);
+				var p = new Point(p1.X + previewNodeView.CalculateIndent(item.Node) + 4.5, p1.Y - 3);
 
 				if (place == DropPlace.After) {
 					p.Y += previewNodeView.ActualHeight;
